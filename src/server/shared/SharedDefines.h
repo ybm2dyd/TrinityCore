@@ -376,6 +376,8 @@ uint32 constexpr QuestDifficultyColors[MAX_QUEST_DIFFICULTY] = {
 // Spell Attributes definitions
 // ***********************************
 
+// find:  ([A-Z_0-9]*) *= *([0-9x]+)(,)?( *// *([^\n\r]+))?
+// replace: ($1, $2, ("$5"))$3
 SMART_ENUM((SpellAttr0, uint32),
 (
    (SPELL_ATTR0_UNK0, 0x00000001),

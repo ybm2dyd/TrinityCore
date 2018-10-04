@@ -4997,9 +4997,9 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage const* log)
     packet.Periodic = log->periodicLog;
     packet.Flags = log->HitInfo;
 
-    WorldPackets::Spells::SandboxScalingData sandboxScalingData;
-    if (sandboxScalingData.GenerateDataForUnits(log->attacker, log->target))
-        packet.SandboxScaling = sandboxScalingData;
+    WorldPackets::Spells::ContentTuningParams contentTuningParams;
+    if (contentTuningParams.GenerateDataForUnits(log->attacker, log->target))
+        packet.ContentTuning = contentTuningParams;
 
     SendCombatLogMessage(&packet);
 }
@@ -5036,10 +5036,10 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* info)
     spellLogEffect.Crit = info->critical;
     /// @todo: implement debug info
 
-    WorldPackets::Spells::SandboxScalingData sandboxScalingData;
+    WorldPackets::Spells::ContentTuningParams contentTuningParams;
     if (Unit* caster = ObjectAccessor::GetUnit(*this, aura->GetCasterGUID()))
-        if (sandboxScalingData.GenerateDataForUnits(caster, this))
-            spellLogEffect.SandboxScaling = sandboxScalingData;
+        if (contentTuningParams.GenerateDataForUnits(caster, this))
+            spellLogEffect.ContentTuning = contentTuningParams;
 
     data.Effects.push_back(spellLogEffect);
 
@@ -5096,9 +5096,9 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
 
     packet.LogData.Initialize(damageInfo->attacker);
 
-    WorldPackets::Spells::SandboxScalingData sandboxScalingData;
-    if (sandboxScalingData.GenerateDataForUnits(damageInfo->attacker, damageInfo->target))
-        packet.SandboxScaling = sandboxScalingData;
+    WorldPackets::Spells::ContentTuningParams contentTuningParams;
+    if (contentTuningParams.GenerateDataForUnits(damageInfo->attacker, damageInfo->target))
+        packet.ContentTuning = contentTuningParams;
 
     SendCombatLogMessage(&packet);
 }
@@ -6334,32 +6334,11 @@ void Unit::SendHealSpellLog(HealInfo& healInfo, bool critical /*= false*/)
 
     spellHealLog.TargetGUID = healInfo.GetTarget()->GetGUID();
     spellHealLog.CasterGUID = healInfo.GetHealer()->GetGUID();
-
     spellHealLog.SpellID = healInfo.GetSpellInfo()->Id;
     spellHealLog.Health = healInfo.GetHeal();
     spellHealLog.OverHeal = int32(healInfo.GetHeal()) - healInfo.GetEffectiveHeal();
     spellHealLog.Absorbed = healInfo.GetAbsorb();
-
     spellHealLog.Crit = critical;
-
-    /// @todo: 6.x Has to be implemented
-    /*
-    packet.ReadBit("Multistrike");
-
-    var hasCritRollMade = packet.ReadBit("HasCritRollMade");
-    var hasCritRollNeeded = packet.ReadBit("HasCritRollNeeded");
-    var hasLogData = packet.ReadBit("HasLogData");
-
-    if (hasCritRollMade)
-        packet.ReadSingle("CritRollMade");
-
-    if (hasCritRollNeeded)
-        packet.ReadSingle("CritRollNeeded");
-
-    if (hasLogData)
-        SpellParsers.ReadSpellCastLogData(packet);
-    */
-
     spellHealLog.LogData.Initialize(healInfo.GetTarget());
     SendCombatLogMessage(&spellHealLog);
 }

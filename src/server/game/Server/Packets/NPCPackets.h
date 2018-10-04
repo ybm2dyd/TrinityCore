@@ -180,6 +180,7 @@ namespace WorldPackets
 
             WorldPacket const* Write() override;
 
+            int32 ID            = 0;
             uint32 Flags        = 0;
             TaggedPosition<Position::XY> Pos;
             int32 Icon          = 0;

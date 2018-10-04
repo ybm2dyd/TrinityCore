@@ -144,11 +144,13 @@ WorldPacket const* WorldPackets::NPC::PlayerTabardVendorActivate::Write()
 
 WorldPacket const* WorldPackets::NPC::GossipPOI::Write()
 {
-    _worldPacket.WriteBits(Flags, 14);
-    _worldPacket.WriteBits(Name.length(), 6);
+    _worldPacket << int32(ID);
     _worldPacket << Pos;
     _worldPacket << int32(Icon);
     _worldPacket << int32(Importance);
+    _worldPacket.WriteBits(Flags, 14);
+    _worldPacket.WriteBits(Name.length(), 6);
+    _worldPacket.FlushBits();
     _worldPacket.WriteString(Name);
 
     return &_worldPacket;

@@ -47,7 +47,7 @@ namespace WorldPackets
             int32 Absorbed = 0;
             int32 Flags = 0;
             // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-            Optional<Spells::SandboxScalingData> SandboxScaling;
+            Optional<Spells::ContentTuningParams> ContentTuning;
         };
 
         class EnvironmentalDamageLog final : public CombatLogServerPacket
@@ -99,12 +99,13 @@ namespace WorldPackets
             ObjectGuid TargetGUID;
             int32 SpellID       = 0;
             int32 Health        = 0;
+            int32 OriginalHeal  = 0;
             int32 OverHeal      = 0;
             int32 Absorbed      = 0;
             bool Crit           = false;
             Optional<float> CritRollMade;
             Optional<float> CritRollNeeded;
-            Optional<Spells::SandboxScalingData> SandboxScaling;
+            Optional<Spells::ContentTuningParams> ContentTuning;
         };
 
         class SpellPeriodicAuraLog final : public CombatLogServerPacket
@@ -126,7 +127,7 @@ namespace WorldPackets
                 int32 Resisted            = 0;
                 bool Crit                 = false;
                 Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo;
-                Optional<Spells::SandboxScalingData> SandboxScaling;
+                Optional<Spells::ContentTuningParams> ContentTuning;
             };
 
             SpellPeriodicAuraLog() : CombatLogServerPacket(SMSG_SPELL_PERIODIC_AURA_LOG, 16 + 16 + 4 + 4 + 1) { }
@@ -267,6 +268,7 @@ namespace WorldPackets
             ObjectGuid Defender;
             int32 SpellID = 0;
             int32 TotalDamage = 0;
+            int32 OriginalDamage = 0;
             int32 OverKill = 0;
             int32 SchoolMask = 0;
             int32 LogAbsorbed = 0;
@@ -308,6 +310,7 @@ namespace WorldPackets
             ObjectGuid AttackerGUID;
             ObjectGuid VictimGUID;
             int32 Damage = 0;
+            int32 OriginalDamage = 0;
             int32 OverDamage = -1; // (damage - health) or -1 if unit is still alive
             Optional<SubDamage> SubDmg;
             uint8 VictimState = 0;
@@ -317,7 +320,7 @@ namespace WorldPackets
             int32 RageGained = 0;
             UnkAttackerState UnkState;
             float Unk = 0.0f;
-            Spells::SandboxScalingData SandboxScaling;
+            Spells::ContentTuningParams ContentTuning;
         };
     }
 }

@@ -55,6 +55,10 @@ class SpellProperties : public QGroupBox
         SpellCastTimeDropdown*  _castTime;
         SpellSchoolSelector*    _spellSchools;
         QDoubleSpinBox*         _recoveryTime;
+        QSpinBox*               _spellCategory;
+        QDoubleSpinBox*         _categoryCooldown;
+        QSpinBox*               _gcdCategory;
+        QDoubleSpinBox*         _gcdDuration;
 
         uint32 _manaCostPerLevel;
 };

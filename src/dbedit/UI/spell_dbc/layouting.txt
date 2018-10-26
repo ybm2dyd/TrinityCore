@@ -50,13 +50,14 @@ Spell properties:
 - manaPerSecondPerLevel (these two are channel costs)
 - runeCostID
 - CastingTimeIndex
-- RecoveryTime
-- CategoryRecoveryTime
+- RecoveryTime                   | self cooldown
+- Category                       \ shared cooldown
+- CategoryRecoveryTime           / (spell category)
+- StartRecoveryTime              \ global cooldown
+- StartRecoveryCategory          / (GCD category, not spell category!)
 - DmgClass
 - SchoolMask
 - PreventionType
-- StartRecoveryCategory
-- StartRecoveryTime
 - InterruptFlags
 - ChannelInterruptFlags
 

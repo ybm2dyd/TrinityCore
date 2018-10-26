@@ -6,7 +6,6 @@
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QGridLayout>
-#include <QSpinBox>
 #include <QStackedWidget>
 
 SpellSchoolSelector::SpellSchoolSelector(QWidget* parent) : QGroupBox(parent)
@@ -46,12 +45,13 @@ void SpellProperties::Setup()
     FIND_Q_CHILD_DELAYED(_manaCostPctSuffix);
     FIND_Q_CHILD_DELAYED(_runeCost);
 
-    _manaCost->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _manaCostPercentage->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
     FIND_Q_CHILD_DELAYED(_castTime);
     FIND_Q_CHILD_DELAYED(_spellSchools);
     FIND_Q_CHILD_DELAYED(_recoveryTime);
+    FIND_Q_CHILD_DELAYED(_spellCategory);
+    FIND_Q_CHILD_DELAYED(_categoryCooldown);
+    FIND_Q_CHILD_DELAYED(_gcdCategory);
+    FIND_Q_CHILD_DELAYED(_gcdDuration);
 }
 
 void SpellProperties::PowerTypeChanged()
@@ -90,9 +90,13 @@ void SpellProperties::SetEntry(SpellEntry const* entry)
     CONNECT(_runeCost, ValueChanged, this, ValueChanged);
 
     _castTime->SetCurrentKey(entry->CastingTimeIndex);
-    _spellSchools->SetMask(entry->SchoolMask);
     _recoveryTime->setValue(double(entry->RecoveryTime) / 1000);
-    printf("Category recovery time %u\n", entry->CategoryRecoveryTime);
+    _spellCategory->setValue(entry->Category);
+    _categoryCooldown->setValue(double(entry->CategoryRecoveryTime) / 1000);
+    _gcdCategory->setValue(entry->StartRecoveryCategory);
+    _gcdDuration->setValue(double(entry->StartRecoveryTime) / 1000);
+
+    _spellSchools->SetMask(entry->SchoolMask);
     printf("Damage class %s\n", EnumUtils<SpellDmgClass>::ToTitle(SpellDmgClass(entry->DmgClass)));
     printf("InterruptFlags %u\n", entry->InterruptFlags);
 }
@@ -104,8 +108,14 @@ void SpellProperties::BuildEntry(SpellEntry& entry) const
     entry.ManaCostPercentage = _manaCostPercentage->value();
     entry.runeCostID = _runeCost->GetCurrentKey();
     entry.manaCostPerlevel = _manaCostPerLevel;
-    entry.RecoveryTime = uint32(_recoveryTime->value() * 1000);
 
     entry.CastingTimeIndex = _castTime->GetCurrentKey();
+    entry.RecoveryTime = uint32(_recoveryTime->value() * 1000);
+
+    entry.Category = _spellCategory->value();
+    entry.CategoryRecoveryTime = uint32(_categoryCooldown->value() * 1000);
+    entry.StartRecoveryCategory = _gcdCategory->value();
+    entry.StartRecoveryTime = uint32(_gcdDuration->value() * 1000);
+
     entry.SchoolMask = _spellSchools->GetMask();
 }

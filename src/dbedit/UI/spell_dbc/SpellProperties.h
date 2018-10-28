@@ -51,6 +51,10 @@ class SpellProperties : public QGroupBox
         QSpinBox*               _manaCostPercentage;
         QLabel*                 _manaCostPctSuffix;
         RuneCostDropdown*       _runeCost;
+        QLabel*                 _upkeepLabel;
+        QWidget*                _upkeepWidget;
+        QSpinBox*               _channelCost;
+        QSpinBox*               _channelCostPerLevel;
 
         SpellCastTimeDropdown*  _castTime;
         SpellSchoolSelector*    _spellSchools;

@@ -44,6 +44,10 @@ void SpellProperties::Setup()
     FIND_Q_CHILD_DELAYED(_manaCostPercentage);
     FIND_Q_CHILD_DELAYED(_manaCostPctSuffix);
     FIND_Q_CHILD_DELAYED(_runeCost);
+    FIND_Q_CHILD_DELAYED(_upkeepLabel);
+    FIND_Q_CHILD_DELAYED(_upkeepWidget);
+    FIND_Q_CHILD_DELAYED(_channelCost);
+    FIND_Q_CHILD_DELAYED(_channelCostPerLevel);
 
     FIND_Q_CHILD_DELAYED(_castTime);
     FIND_Q_CHILD_DELAYED(_spellSchools);
@@ -60,18 +64,25 @@ void SpellProperties::PowerTypeChanged()
     {
         case POWER_RUNE:
             _powerTypeSub->setCurrentIndex(PAGE_RUNE);
+            _upkeepLabel->hide();
+            _upkeepWidget->hide();
             break;
         case POWER_RUNIC_POWER:
             _manaCostPctPrefix->hide();
             _manaCostPercentage->hide();
             _manaCostPctSuffix->hide();
+            _upkeepLabel->hide();
+            _upkeepWidget->hide();
             _powerTypeSub->setCurrentIndex(PAGE_REGULAR);
             break;
         default:
             _manaCostPctPrefix->show();
             _manaCostPercentage->show();
             _manaCostPctSuffix->show();
+            _upkeepLabel->show();
+            _upkeepWidget->show();
             _powerTypeSub->setCurrentIndex(PAGE_REGULAR);
+            break;
     }
 }
 
@@ -82,6 +93,8 @@ void SpellProperties::SetEntry(SpellEntry const* entry)
     _manaCostPercentage->setValue(entry->ManaCostPercentage);
     _runeCost->SetCurrentKey(entry->runeCostID);
     _manaCostPerLevel = entry->manaCostPerlevel;
+    _channelCost->setValue(entry->manaPerSecond);
+    _channelCostPerLevel->setValue(entry->manaPerSecondPerLevel);
     PowerTypeChanged();
     CONNECT(_powerType, ValueChanged, this, PowerTypeChanged);
     CONNECT(_powerType, ValueChanged, this, ValueChanged);
@@ -108,6 +121,8 @@ void SpellProperties::BuildEntry(SpellEntry& entry) const
     entry.ManaCostPercentage = _manaCostPercentage->value();
     entry.runeCostID = _runeCost->GetCurrentKey();
     entry.manaCostPerlevel = _manaCostPerLevel;
+    entry.manaPerSecond = _channelCost->value();
+    entry.manaPerSecondPerLevel = _channelCostPerLevel->value();
 
     entry.CastingTimeIndex = _castTime->GetCurrentKey();
     entry.RecoveryTime = uint32(_recoveryTime->value() * 1000);

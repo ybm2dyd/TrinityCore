@@ -8,25 +8,22 @@
 #include <QGridLayout>
 #include <QStackedWidget>
 
-SpellSchoolSelector::SpellSchoolSelector(QWidget* parent) : QGroupBox(parent)
+QCheckBox* SelectorBase::MakeBox(uint32 value, char const* title)
 {
-    QGridLayout* layout = new QGridLayout(this);
-    for (SpellSchools v : EnumUtils<SpellSchools>::Iterate())
-    {
-        QCheckBox* box = new QCheckBox(this);
-        _checkboxes.emplace(box, (1 << v));
-        box->setText(EnumUtils<SpellSchools>::ToTitle(v));
-        layout->addWidget(box, (v + 1) / 2, (v ? 1 - (v % 2) : 0), 1, (v ? 1 : 2), Qt::AlignLeft);
-    }
+    QCheckBox* box = new QCheckBox(this);
+    _checkboxes.emplace(box, value);
+    box->setText(title);
+    CONNECT(box, stateChanged, this, ValueChanged);
+    return box;
 }
 
-void SpellSchoolSelector::SetMask(uint32 mask)
+void SelectorBase::SetMask(uint32 mask)
 {
     for (auto pair : _checkboxes)
         pair.first->setChecked(pair.second & mask);
 }
 
-uint32 SpellSchoolSelector::GetMask() const
+uint32 SelectorBase::GetMask() const
 {
     uint32 v = 0;
     for (auto pair : _checkboxes)
@@ -35,8 +32,49 @@ uint32 SpellSchoolSelector::GetMask() const
     return v;
 }
 
+SpellSchoolSelector::SpellSchoolSelector(QWidget* parent) : SelectorBase(parent)
+{
+    QGridLayout* layout = new QGridLayout(this);
+    layout->setAlignment(Qt::AlignTop);
+    for (SpellSchools v : EnumUtils<SpellSchools>::Iterate())
+    {
+        QCheckBox* box = MakeBox(1 << v, EnumUtils<SpellSchools>::ToTitle(v));
+        layout->addWidget(box, (v + 1) / 2, (v ? 1 - (v % 2) : 0), 1, (v ? 1 : 2), Qt::AlignLeft);
+    }
+}
+
+CastInterruptSelector::CastInterruptSelector(QWidget* parent) : SelectorBase(parent)
+{
+    QGridLayout* layout = new QGridLayout(this);
+    layout->setAlignment(Qt::AlignTop);
+    uint32 i = 0;
+    for (SpellInterruptFlags v : EnumUtils<SpellInterruptFlags>::Iterate())
+    {
+        QCheckBox* box = MakeBox(v, EnumUtils<SpellInterruptFlags>::ToTitle(v));
+        layout->addWidget(box, i/2, i%2, Qt::AlignLeft);
+        ++i;
+    }
+}
+
+ChannelInterruptSelector::ChannelInterruptSelector(QWidget* parent) : SelectorBase(parent)
+{
+    QGridLayout* layout = new QGridLayout(this);
+    layout->setAlignment(Qt::AlignTop);
+    uint32 i = 0;
+    for (SpellChannelInterruptFlags v : EnumUtils<SpellChannelInterruptFlags>::Iterate())
+    {
+        QCheckBox* box = MakeBox(v, EnumUtils<SpellChannelInterruptFlags>::ToTitle(v));
+        layout->addWidget(box, i/2, i%2, Qt::AlignLeft);
+        ++i;
+    }
+}
+
+
 void SpellProperties::Setup()
 {
+    FIND_Q_CHILD_DELAYED(_damageClass);
+    FIND_Q_CHILD_DELAYED(_preventionType);
+
     FIND_Q_CHILD_DELAYED(_powerType);
     FIND_Q_CHILD_DELAYED(_powerTypeSub);
     FIND_Q_CHILD_DELAYED(_manaCost);
@@ -48,14 +86,17 @@ void SpellProperties::Setup()
     FIND_Q_CHILD_DELAYED(_upkeepWidget);
     FIND_Q_CHILD_DELAYED(_channelCost);
     FIND_Q_CHILD_DELAYED(_channelCostPerLevel);
-
+    
     FIND_Q_CHILD_DELAYED(_castTime);
-    FIND_Q_CHILD_DELAYED(_spellSchools);
     FIND_Q_CHILD_DELAYED(_recoveryTime);
     FIND_Q_CHILD_DELAYED(_spellCategory);
     FIND_Q_CHILD_DELAYED(_categoryCooldown);
     FIND_Q_CHILD_DELAYED(_gcdCategory);
     FIND_Q_CHILD_DELAYED(_gcdDuration);
+
+    FIND_Q_CHILD_DELAYED(_spellSchools);
+    FIND_Q_CHILD_DELAYED(_interruptFlags);
+    FIND_Q_CHILD_DELAYED(_channelInterruptFlags);
 }
 
 void SpellProperties::PowerTypeChanged()
@@ -88,6 +129,9 @@ void SpellProperties::PowerTypeChanged()
 
 void SpellProperties::SetEntry(SpellEntry const* entry)
 {
+    _damageClass->SetCurrentKey(entry->DmgClass);
+    _preventionType->SetCurrentKey(entry->PreventionType);
+
     _powerType->SetCurrentValue(Powers(entry->powerType));
     _manaCost->setValue(entry->manaCost);
     _manaCostPercentage->setValue(entry->ManaCostPercentage);
@@ -110,12 +154,15 @@ void SpellProperties::SetEntry(SpellEntry const* entry)
     _gcdDuration->setValue(double(entry->StartRecoveryTime) / 1000);
 
     _spellSchools->SetMask(entry->SchoolMask);
-    printf("Damage class %s\n", EnumUtils<SpellDmgClass>::ToTitle(SpellDmgClass(entry->DmgClass)));
-    printf("InterruptFlags %u\n", entry->InterruptFlags);
+    _interruptFlags->SetMask(entry->InterruptFlags);
+    _channelInterruptFlags->SetMask(entry->ChannelInterruptFlags);
 }
 
 void SpellProperties::BuildEntry(SpellEntry& entry) const
 {
+    entry.DmgClass = _damageClass->GetCurrentKey();
+    entry.PreventionType = _preventionType->GetCurrentKey();
+
     entry.powerType = _powerType->GetCurrentValue();
     entry.manaCost = _manaCost->value();
     entry.ManaCostPercentage = _manaCostPercentage->value();
@@ -133,4 +180,6 @@ void SpellProperties::BuildEntry(SpellEntry& entry) const
     entry.StartRecoveryTime = uint32(_gcdDuration->value() * 1000);
 
     entry.SchoolMask = _spellSchools->GetMask();
+    entry.InterruptFlags = _interruptFlags->GetMask();
+    entry.ChannelInterruptFlags = _channelInterruptFlags->GetMask();
 }

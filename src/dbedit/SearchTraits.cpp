@@ -206,6 +206,24 @@ bool SearchTraits<Powers, void>::CheckLabel(Powers v, char const* label, char co
     return false;
 }
 
+bool SearchTraits<SpellDmgClass, void>::CheckLabel(SpellDmgClass v, char const* label, char const* needle)
+{
+    if (!label)
+        return true;
+
+    UnknownLabelWarn(label);
+    return false;
+}
+
+bool SearchTraits<SpellPreventionType, void>::CheckLabel(SpellPreventionType v, char const* label, char const* needle)
+{
+    if (!label)
+        return true;
+
+    UnknownLabelWarn(label);
+    return false;
+}
+
 uint32 SearchTraits<SpellRuneCostEntry const*, void>::ToKey(SpellRuneCostEntry const* entry) { return entry->ID; }
 std::string SearchTraits<SpellRuneCostEntry const*, void>::GetTitle(SpellRuneCostEntry const* entry)
 {
